@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <div class="page">
+        <div class="container">
+
+            <div class="hero">
+                <h1>AI Resume Analyzer</h1>
+                <p class="subtitle">
+                    Paste your resume below and get role prediction, confidence score,
+                    resume score, and skill-gap analysis.
+                </p>
+            </div>
+
+            <div class="main-card">
+                <form action="/predict" method="POST" class="resume-form">
+                    <label for="resume" class="label">Resume Text</label>
+                    <textarea id="resume" name="resume" rows="14" placeholder="Paste your resume text here..."
+                        required>{{ resume_text if resume_text else "" }}</textarea>
+
+                    <button type="submit" class="analyze-btn">Analyze Resume</button>
+                </form>
+            </div>
+
+            {% if prediction %}
+            <div class="results-section">
+
+                <div class="summary-grid">
+                    <div class="info-card highlight">
+                        <h3>Predicted Role</h3>
+                        <p class="big-text">{{ prediction }}</p>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Confidence</h3>
+                        <p class="big-text">{{ confidence }}%</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill confidence-fill" style="width: {{ confidence }}%;"></div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <h3>Resume Score</h3>
+                        <p class="big-text">{{ score }}/100</p>
+                        <div class="progress-bar">
+                            <div class="progress-fill score-fill" style="width: {{ score }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <h2>Analysis Result</h2>
+
+                    <div class="tag-section">
+                        <h3>Skills Found</h3>
+                        <div class="tag-container">
+                            {% if found_skills %}
+                            {% for skill in found_skills %}
+                            <span class="tag tag-found">{{ skill }}</span>
+                            {% endfor %}
+                            {% else %}
+                            <p class="empty-text">No skills detected.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="tag-section">
+                        <h3>Missing Skills</h3>
+                        <div class="tag-container">
+                            {% if missing_skills %}
+                            {% for skill in missing_skills %}
+                            <span class="tag tag-missing">{{ skill }}</span>
+                            {% endfor %}
+                            {% else %}
+                            <p class="empty-text">No missing skills found. Great job!</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="tips-box">
+                        <h3>Suggestions to Improve</h3>
+                        <ul>
+                            {% if missing_skills %}
+                            <li>Add the missing technical skills relevant to the predicted role.</li>
+                            <li>Include at least 2 strong projects with tools and outcomes.</li>
+                            <li>Mention certifications, internships, and measurable achievements.</li>
+                            <li>Use keywords related to your target role for better ATS visibility.</li>
+                            {% else %}
+                            <li>Your resume already matches many expected skills.</li>
+                            <li>Focus on adding achievements, certifications, and project impact.</li>
+                            <li>Keep your resume concise and ATS-friendly.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</body>
+
+</html>
