@@ -1,33 +1,13 @@
 from flask import Flask, render_template, request
 import pickle
 import re
-import nltk
-
-nltk.download('stopwords')
-from nltk.corpus import stopwords
 
 app = Flask(__name__)
 
-# Load model files
-with open("model.pkl", "rb") as f:
-    model = pickle.load(f)
+model = pickle.load(open("model.pkl", "rb"))
+vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+label_encoder = pickle.load(open("label_encoder.pkl", "rb"))
 
-with open("vectorizer.pkl", "rb") as f:
-    vectorizer = pickle.load(f)
-
-with open("label_encoder.pkl", "rb") as f:
-    label_encoder = pickle.load(f)
-
-stop_words = set(stopwords.words('english'))
-
-def clean_text(text):
-    text = str(text).lower()
-    text = re.sub(r'[^a-zA-Z\s]', ' ', text)
-    words = text.split()
-    words = [word for word in words if word not in stop_words]
-    return " ".join(words)
-
-# Skill database
 role_skills = {
     "Data Analyst": ["python", "sql", "excel", "power bi", "tableau", "statistics", "pandas"],
     "Data Scientist": ["python", "machine learning", "deep learning", "nlp", "tensorflow", "pandas"],
@@ -37,6 +17,11 @@ role_skills = {
     "ML Engineer": ["python", "scikit", "machine learning", "tensorflow", "deep learning", "deployment"],
     "Full Stack Developer": ["html", "css", "javascript", "react", "node", "express", "mongodb"]
 }
+
+def clean_text(text):
+    text = str(text).lower()
+    text = re.sub(r'[^a-zA-Z\s]', ' ', text)
+    return " ".join(text.split())
 
 def extract_skills(resume_text):
     resume_lower = resume_text.lower()
@@ -67,10 +52,9 @@ def predict():
     prediction = model.predict(vectorized)[0]
     predicted_role = label_encoder.inverse_transform([prediction])[0]
 
+    confidence = 0
     if hasattr(model, "predict_proba"):
         confidence = max(model.predict_proba(vectorized)[0]) * 100
-    else:
-        confidence = 0
 
     found_skills = extract_skills(resume_text)
 
